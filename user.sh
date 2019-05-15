@@ -71,8 +71,8 @@ add_user() {
         echo "no available ip"
         exit 1
     fi
-    eval "echo \"$(cat "${template_file}")\"" > $userdir/client.conf
-    qrencode -o $userdir/$user.png  < $userdir/client.conf
+    eval "echo \"$(cat "${template_file}")\"" > $userdir/wg0.conf
+    qrencode -o $userdir/$user.png  < $userdir/wg0.conf
 
     # change wg config
     local ip=${_VPN_IP%/*}/32

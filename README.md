@@ -29,15 +29,15 @@ Running as root.
 ./user.sh -a alice
 ```
 
-This will generate a client conf and qrcode in current directory which name is alice
-and add alice to the wg config.
+This will generate a client conf and qrcode in users directory which name is alice
+and add alice to the wg server config.
 
 #### delete a user
 
 ```bash
 ./user.sh -d alice
 ```
-This will delete the alice directory and delete alice from the wg config.
+This will delete the alice directory and delete alice from the wg server config.
 
 #### clear all
 
