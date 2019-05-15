@@ -162,12 +162,17 @@ init_server() {
     wg-quick up $interface
 }
 
+list_user() {
+    cat ${SAVED_FILE}
+}
+
 usage() {
     echo "usage: $0 [-a|-d|-c|-g|-i] [username]
 
     -i: init server conf
     -a: add user
     -d: del user
+    -l: list all users
     -c: clear all
     -g: generate ip file
     "
@@ -186,6 +191,8 @@ if [[ $action == "-i" ]]; then
     init_server
 elif [[ $action == "-c" ]]; then
     clear_all
+elif [[ $action == "-l" ]]; then
+    list_user
 elif [[ $action == "-g" ]]; then
     generate_cidr_ip_file_if
 elif [[ ! -z "$user" && ( $action == "-a" || $action == "-d" ) ]]; then
