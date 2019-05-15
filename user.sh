@@ -84,7 +84,7 @@ add_user() {
       exit 1
     fi
 
-    echo "$user $_VPN_IP $public_key" >> ${SAVED_FILE}
+    echo "$user $_VPN_IP $public_key" >> ${SAVED_FILE} && echo "use $user is added. config dir is $userdir"
 }
 
 del_user() {
@@ -105,7 +105,7 @@ del_user() {
     if [[ -n "$ip" ]]; then
         echo "$ip" >> ${AVAILABLE_IP_FILE}
     fi
-    rm -rf $userdir
+    rm -rf $userdir && echo "use $user is deleted"
 }
 
 generate_and_install_server_config_file() {
@@ -125,7 +125,7 @@ EOF
     \cp -f $WG_TMP_CONF_FILE $WG_CONF_FILE
 }
 
-do_clear() {
+clear_all() {
     local interface=$_INTERFACE
     wg-quick down $interface
     > $WG_CONF_FILE
@@ -148,8 +148,29 @@ do_user() {
     generate_and_install_server_config_file
 }
 
+init_server() {
+    local interface=$_INTERFACE
+    local template_file=${SERVER_TPL_FILE}
+
+    if [[ -s $WG_CONF_FILE ]]; then
+        echo "$WG_CONF_FILE exist"
+	exit 1
+    fi
+    generate_cidr_ip_file_if
+    eval "echo \"$(cat "${template_file}")\"" > $WG_CONF_FILE
+    chmod 600 $WG_CONF_FILE
+    wg-quick up $interface
+}
+
 usage() {
-    echo "usage: $0 [-a|-d|-c|-g] [username]"
+    echo "usage: $0 [-a|-d|-c|-g|-i] [username]
+
+    -i: init server conf
+    -a: add user
+    -d: del user
+    -c: clear all
+    -g: generate ip file
+    "
 }
 
 # main
@@ -161,8 +182,10 @@ fi
 action=$1
 user=$2
 
-if [[ $action == "-c" ]]; then
-    do_clear
+if [[ $action == "-i" ]]; then
+    init_server
+elif [[ $action == "-c" ]]; then
+    clear_all
 elif [[ $action == "-g" ]]; then
     generate_cidr_ip_file_if
 elif [[ ! -z "$user" && ( $action == "-a" || $action == "-d" ) ]]; then
