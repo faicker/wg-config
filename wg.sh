@@ -71,17 +71,24 @@ add_user() {
         echo "no available ip"
         exit 1
     fi
+    _TABLE=auto
+    if [[ ! -z "$route" ]]; then
+	_TABLE=off
+    fi
     eval "echo \"$(cat "${template_file}")\"" > $userdir/wg0.conf
     qrencode -o $userdir/$user.png  < $userdir/wg0.conf
 
     # change wg config
     local ip=${_VPN_IP%/*}/32
+    if [[ ! -z "$route" ]]; then
+	ip="0.0.0.0/0,::/0"
+    fi
     local public_key=`cat $userdir/publickey`
     wg set $interface peer $public_key allowed-ips $ip
     if [[ $? -ne 0 ]]; then
-      echo "wg set failed"
-      rm -rf $user
-      exit 1
+        echo "wg set failed"
+        rm -rf $user
+        exit 1
     fi
 
     echo "$user $_VPN_IP $public_key" >> ${SAVED_FILE} && echo "use $user is added. config dir is $userdir"
@@ -115,8 +122,11 @@ generate_and_install_server_config_file() {
     # server config file
     eval "echo \"$(cat "${template_file}")\"" > $WG_TMP_CONF_FILE
     while read user vpn_ip public_key; do
-      ip=${vpn_ip%/*}/32
-      cat >> $WG_TMP_CONF_FILE <<EOF
+        ip=${vpn_ip%/*}/32
+        if [[ ! -z "$route" ]]; then
+            ip="0.0.0.0/0,::/0"
+        fi
+        cat >> $WG_TMP_CONF_FILE <<EOF
 [Peer]
 PublicKey = $public_key
 AllowedIPs = $ip
@@ -167,7 +177,7 @@ list_user() {
 }
 
 usage() {
-    echo "usage: $0 [-a|-d|-c|-g|-i] [username]
+    echo "usage: $0 [-a|-d|-c|-g|-i] [username] [-r]
 
     -i: init server conf
     -a: add user
@@ -175,6 +185,7 @@ usage() {
     -l: list all users
     -c: clear all
     -g: generate ip file
+    -r: enable router(allow 0.0.0.0/0)
     "
 }
 
@@ -186,6 +197,7 @@ fi
 
 action=$1
 user=$2
+route=$3
 
 if [[ $action == "-i" ]]; then
     init_server
