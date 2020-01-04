@@ -1,7 +1,6 @@
 [Interface]
 Address = $_VPN_IP
 PrivateKey = $_PRIVATE_KEY
-Table = $_TABLE
 
 [Peer]
 PublicKey = $_SERVER_PUBLIC_KEY

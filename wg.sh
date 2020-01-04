@@ -41,7 +41,7 @@ generate_cidr_ip_file_if() {
     local i=$((beg+2))
     while [[ $i -lt $end ]]; do
         ip=$(dec2ip $i)
-	echo "$ip/$mask" >> $AVAILABLE_IP_FILE
+        echo "$ip/$mask" >> $AVAILABLE_IP_FILE
         i=$((i+1))
     done
 }
@@ -49,7 +49,7 @@ generate_cidr_ip_file_if() {
 get_vpn_ip() {
     local ip=$(head -1 $AVAILABLE_IP_FILE)
     if [[ $ip ]]; then
-	local mat="${ip/\//\\\/}"
+    local mat="${ip/\//\\\/}"
         sed -i "/^$mat$/d" $AVAILABLE_IP_FILE
     fi
     echo "$ip"
@@ -71,17 +71,13 @@ add_user() {
         echo "no available ip"
         exit 1
     fi
-    _TABLE=auto
-    if [[ ! -z "$route" ]]; then
-	_TABLE=off
-    fi
     eval "echo \"$(cat "${template_file}")\"" > $userdir/wg0.conf
     qrencode -o $userdir/$user.png  < $userdir/wg0.conf
 
     # change wg config
     local ip=${_VPN_IP%/*}/32
     if [[ ! -z "$route" ]]; then
-	ip="0.0.0.0/0,::/0"
+        ip="0.0.0.0/0,::/0"
     fi
     local public_key=`cat $userdir/publickey`
     wg set $interface peer $public_key allowed-ips $ip
@@ -164,7 +160,7 @@ init_server() {
 
     if [[ -s $WG_CONF_FILE ]]; then
         echo "$WG_CONF_FILE exist"
-	exit 1
+        exit 1
     fi
     generate_cidr_ip_file_if
     eval "echo \"$(cat "${template_file}")\"" > $WG_CONF_FILE
@@ -185,7 +181,7 @@ usage() {
     -l: list all users
     -c: clear all
     -g: generate ip file
-    -r: enable router(allow 0.0.0.0/0)
+    -r: enable route all traffic(allow 0.0.0.0/0)
     "
 }
 
